@@ -2,19 +2,25 @@
 #define SCHEDULER_HPP
 
 #include <iostream>
+#include <queue>
 #include <vector>
-#include <algorithm>
 
 struct Process {
     size_t burstTime;
-    int remainingTime;
     pid_t pid;
 
     int completionTime = 0;
     int turnaroundTime = 0;
     int waitingTime = 0;
 
-    Process(pid_t id, size_t bt) : pid(id), burstTime(bt), remainingTime(bt) {}
+    Process(pid_t id, size_t bt) : burstTime(bt), pid(id) {}
+};
+
+// Custom comparator for priority_queue (min-heap by burstTime)
+struct CompareBurst {
+    bool operator()(const Process& a, const Process& b) {
+        return a.burstTime > b.burstTime;  // smaller burstTime = higher priority
+    }
 };
 
 class JobScheduler {
@@ -24,11 +30,9 @@ public:
 
     void runSJF();
     void submitProcess(const Process& p);
-    void submitBatch(const std::vector<Process>& batch);
-    std::vector<Process> getScheduledJobs() const;
 
 private:
-    std::vector<Process> _jobList;
+    std::priority_queue<Process, std::vector<Process>, CompareBurst> _jobQueue;
 };
 
 #endif // SCHEDULER_HPP
